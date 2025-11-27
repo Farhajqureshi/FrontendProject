@@ -6,5 +6,5 @@ app_port       = 80
 instance_type  = "t3.medium"
 environment    = "prod"
 key_name        = "farhaj-key"
-public_key_path = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC..."
+public_key_path = "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA... user@host"
 user_data_path  = "user_data.sh"
