@@ -1,14 +1,24 @@
 name: Terraform CI/CD
 
 on:
+  workflow_dispatch:
+    inputs:
+      action_type:
+        description: 'Choose action to run'
+        required: true
+        default: 'plan'
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
   push:
     branches:
       - main
   pull_request:
     branches:
       - main
-  workflow_dispatch:
-#hello osam
+
 jobs:
   terraform:
     runs-on: ubuntu-latest
@@ -38,24 +48,28 @@ jobs:
         run: terraform validate
 
       - name: Terraform Plan
+        if: >
+          github.event_name == 'pull_request'
+          || github.event_name == 'push'
+          || github.event.inputs.action_type == 'plan'
         working-directory: infra
-        run: terraform plan -input=false -out=tfplan
-        
-      
-      - name: Upload plan artifact
-        if: github.event_name == 'pull_request
+        run: terraform plan -input=false -out=infra/tfplan
+
+      - name: Upload plan artifact (PR only)
+        if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: tfplan
           path: infra/tfplan
 
       - name: Terraform Apply (main only)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: >
+          (github.event_name == 'push' && github.ref == 'refs/heads/main')
+          || github.event.inputs.action_type == 'apply'
         working-directory: infra
         run: terraform apply -input=false -auto-approve
-        
-      - name: Terraform Destroy
+
+      - name: Terraform Destroy (manual)
         if: github.event.inputs.action_type == 'destroy'
         working-directory: infra
         run: terraform destroy -auto-approve
-
