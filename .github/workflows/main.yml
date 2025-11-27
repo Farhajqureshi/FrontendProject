@@ -1,21 +1,17 @@
 name: Terraform CI/CD
 
 on:
-  pull_request:
-    paths:
-      - 'infra/**'
   push:
     branches:
       - main
-    paths:
-      - 'infra/**'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
 
     steps:
       - name: Checkout repo
@@ -24,7 +20,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: '1.5.7' # change if needed
+          terraform_version: '1.5.7'
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -41,19 +37,19 @@ jobs:
         working-directory: infra
         run: terraform validate
 
-      - name: Terraform Plan
+      - name: Terraform Plan (PR only)
         if: github.event_name == 'pull_request'
         working-directory: infra
         run: terraform plan -input=false -out=tfplan
 
-      - name: Upload plan artifact (PR)
+      - name: Upload plan artifact (PR only)
         if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: tfplan
           path: infra/tfplan
 
-      - name: Terraform Apply (on main)
+      - name: Terraform Apply (main only)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         working-directory: infra
         run: terraform apply -input=false -auto-approve
