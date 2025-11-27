@@ -5,6 +5,6 @@ my_ip_cidr     = "203.0.113.4/32"
 app_port       = 80
 instance_type  = "t3.medium"
 environment    = "prod"
-key_name       = "farhaj-key"
+key_name        = "farhaj-key"
 public_key_path = "~/.ssh/id_rsa.pub"
 user_data_path  = "user_data.sh"
